@@ -1,1 +1,5 @@
-Details about this assignment can be found [on the course webpage](http://cs231n.github.io/), under Assignment #1 of Spring 2022.
+1주차 : knn.ipynb
+
+2주차 : svm.ipynb, softmax.ipynb
+
+3주차 : two_layer_net.ipynb, features.ipynb
