@@ -78,6 +78,8 @@ class KNearestNeighbor(object):
                 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
                 pass
+                value = X[i] - self.X_train[j]
+                dists[i,j] = np.sqrt(np.sum(np.square(value)))
 
                 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
