@@ -104,6 +104,8 @@ class KNearestNeighbor(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             pass
+            value = self.X_train - X[i]
+            dists[i,:] = np.sqrt(np.sum(np.square(value), axis=1))
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -134,6 +136,11 @@ class KNearestNeighbor(object):
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         pass
+        #NOTE: (v1 - v2)^2 == v1^2 + v2^2 - 2*v1*v2
+        square_sum_X = np.sum(np.square(X), axis=1).reshape(-1, 1)
+        square_sum_train = np.sum(np.square(self.X_train), axis=1).reshape(1, -1)
+        squareL2 = (-2 * (X @ self.X_train.T)) + square_sum_X + square_sum_train
+        dists = np.sqrt(squareL2)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -167,6 +174,8 @@ class KNearestNeighbor(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             pass
+            ret_args = dists[i].argsort()
+            closest_y = self.y_train[ret_args[0:k]].tolist()
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
             #########################################################################
@@ -179,6 +188,25 @@ class KNearestNeighbor(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             pass
+            countDict = {}
+            highestCount = 0
+            highestCount_y = None
+            for yValue in closest_y:
+                if countDict.get(yValue) == None:
+                    countDict[yValue] = 1
+                else:
+                    countDict[yValue] += 1
+                if countDict[yValue] >= highestCount:
+                    if highestCount_y == None or \
+                    countDict[yValue] > highestCount or \
+                    yValue < highestCount_y:
+                        highestCount_y = yValue
+                        highestCount = countDict[yValue]
+            y_pred[i] = highestCount_y
+            
+            #print(closest_y)
+            #print(highestCount)
+            #print(highestCount_y)
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
