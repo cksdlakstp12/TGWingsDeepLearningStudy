@@ -93,6 +93,47 @@ def svm_loss_vectorized(W, X, y, reg):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     pass
+    #NOTE: derivative of 'score[i,j]' with respect to 'W[k,j]' is 'X[i,k]'
+    #-> derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+    # derivative of 'loss value' with respect to 'score[i,j]' is (0 or 'score[i,j]' or '-lossAffectCount * score[i,j]')
+    dW = np.zeros(W.shape)  # initialize the gradient as zero
+
+    # compute the loss and the gradient
+    num_classes = W.shape[1]
+    num_train = X.shape[0]
+    loss = 0.0
+    score = X.dot(W)
+    margin = score + 1
+    correct_class_score = np.zeros((num_train, ))
+    for i in range(num_train):
+        margin[i,y[i]] = correct_class_score[i] = score[i,y[i]]
+    margin -= correct_class_score.reshape(-1, 1)
+    #
+    for j in range(num_classes):
+        view = margin[:,j]
+        mask = view > 0
+        #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is 'score[i,j]'
+        #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+        dW[:,j] += np.sum(X[mask], axis=0)
+        #loss value update
+        loss += view[mask].sum()
+        pass
+    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '-lossAffectCount * score[i,j]'
+    #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+    margin[margin > 0] = 1
+    margin[margin < 0] = 0
+    tmp = (np.sum(margin, axis=1).reshape(-1,1) * X)
+    for i in range(num_train):
+        dW[:,y[i]] -= tmp[i]
+
+    # Right now the loss is a sum over all training examples, but we want it
+    # to be an average instead so we divide by num_train.
+    loss /= num_train
+    dW /= num_train
+
+    # Add regularization to the loss.
+    loss += reg * np.sum(W * W)
+    dW += 2 * reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
