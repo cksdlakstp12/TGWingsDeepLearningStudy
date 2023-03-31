@@ -116,7 +116,9 @@ class LinearClassifier(object):
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         pass
-        y_pred = np.argsort(X.dot(self.W), axis=1)[:,-1:]
+        #y_pred = np.argsort(X.dot(self.W), axis=1)[:,-1:] # This is wrong code
+        #y_pred = np.argsort(X.dot(self.W), axis=1)[:,-1:][:,0] # This works well, but sort is not required
+        y_pred = np.argmax(X.dot(self.W), axis=1)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return y_pred
