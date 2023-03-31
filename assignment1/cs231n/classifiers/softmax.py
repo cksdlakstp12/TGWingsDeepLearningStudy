@@ -105,14 +105,20 @@ def softmax_loss_vectorized(W, X, y, reg):
     score = X.dot(W)
     e_score = np.exp(score - np.max(score, axis=1).reshape(-1,1))
     sum_e_score = np.sum(e_score, axis=1)
-    loss -= np.sum(np.log(e_score[range(num_train),list(y)] / sum_e_score))
+    loss -= np.sum(np.log(e_score[range(num_train),y] / sum_e_score))
     tmp = np.zeros((num_train, num_classes))
-    tmp[range(num_train),list(y)] = 1
-    for j in range(num_classes):
-        dW[:,j] += np.sum(X * (
-            (e_score[:,j] / sum_e_score).reshape(-1,1)
-            - tmp[:,j].reshape(-1,1)
-        ), axis=0)
+    tmp[range(num_train),y] = 1
+    dW += np.sum(
+        np.expand_dims((e_score / sum_e_score.reshape(-1,1) - tmp), axis=1) *
+        np.expand_dims(X, axis=2),
+        axis=0
+    )
+    #This loop may be faster than above line, depends on circumstances.
+    #for j in range(num_classes):
+    #    dW[:,j] += np.sum(X * (
+    #        (e_score[:,j] / sum_e_score).reshape(-1,1)
+    #        - tmp[:,j].reshape(-1,1)
+    #    ), axis=0)
 
     # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
