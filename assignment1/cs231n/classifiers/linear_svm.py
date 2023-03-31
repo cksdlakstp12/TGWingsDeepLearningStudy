@@ -105,26 +105,34 @@ def svm_loss_vectorized(W, X, y, reg):
     score = X.dot(W)
     margin = score + 1
     correct_class_score = np.zeros((num_train, ))
-    for i in range(num_train):
-        margin[i,y[i]] = correct_class_score[i] = score[i,y[i]]
+    margin[range(num_train),y] = correct_class_score = score[range(num_train),y]
     margin -= correct_class_score.reshape(-1, 1)
+    margin[margin < 0] = 0
+    #loss value update
+    loss += margin.sum()
+    bmargin = (margin > 0)
+    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is 'score[i,j]'
+    #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+    #dW[:,j] += (X[i] * bmargin[i,j])
+    #dW += (X[i].reshape(-1,1) * bmargin[i].reshape(1,-1))
+    dW += np.sum(np.expand_dims(X, axis=2) * np.expand_dims(bmargin, axis=1), axis=0)
     #
-    for j in range(num_classes):
-        view = margin[:,j]
-        mask = view > 0
-        #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is 'score[i,j]'
-        #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
-        dW[:,j] += np.sum(X[mask], axis=0)
-        #loss value update
-        loss += view[mask].sum()
-        pass
     #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '-lossAffectCount * score[i,j]'
     #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
-    margin[margin > 0] = 1
-    margin[margin < 0] = 0
-    tmp = (np.sum(margin, axis=1).reshape(-1,1) * X)
-    for i in range(num_train):
-        dW[:,y[i]] -= tmp[i]
+    lossAffectCount = np.sum(bmargin, axis=1)
+    #dW[:,y[i]] -= (lossAffectCount[i] * X[i])
+    #dW[:,y] -= (lossAffectCount * X.T) # This cause read-write problem
+    y_convertIdx = np.zeros((num_classes, num_train, 1))
+    y_convertIdx[y,range(num_train),0] = 1
+    dW -= np.sum(
+        (
+            np.expand_dims(
+                (lossAffectCount.reshape(-1,1) * X),
+                axis=0
+            ) * y_convertIdx
+        ),
+        axis=1
+    ).T
 
     # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
