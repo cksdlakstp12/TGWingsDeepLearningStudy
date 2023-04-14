@@ -37,9 +37,9 @@ def softmax_loss_naive(W, X, y, reg):
     pass
     #NOTE: derivative of 'score[i,j]' with respect to 'W[k,j]' is 'X[i,k]'
     #-> derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
-    # 'loss value' of 'score[i,j]' is (-ln(e^y / s)) or (ln(1+ze^(-x))), 'x' is 'score[i,j]', 'y' is 'score[i,y[i]]', 's' is sum of 'e^score[i]', 'z' is sum of 'e^score[i]' without 'score[i,j]'.
-    # derivative of 'loss value' with respect to 'score[i,j]' is ((e^x)/s - 1) when j is correct class.
-    # derivative of 'loss value' with respect to 'score[i,j]' is ((e^x)/s) when j is not correct class.
+    # 'loss value' of 'score[i,j]' is (-ln(e^y / s)) or (ln(1+ze^(-y))), 'y' is 'score[i,y[i]]', 's' is sum of 'e^score[i]', 'z' is sum of 'e^score[i]' without 'score[i,y[i]]'.
+    # derivative of 'loss value' with respect to 'x=score[i,j]' is ((e^x)/s - 1) when j is correct class.
+    # derivative of 'loss value' with respect to 'x=score[i,j]' is ((e^x)/s) when j is not correct class.
     #
     # compute the loss and the gradient
     num_classes = W.shape[1]
@@ -94,9 +94,9 @@ def softmax_loss_vectorized(W, X, y, reg):
     pass
     #NOTE: derivative of 'score[i,j]' with respect to 'W[k,j]' is 'X[i,k]'
     #-> derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
-    # 'loss value' of 'score[i,j]' is (-ln(e^y / s)) or (ln(1+ze^(-x))), 'x' is 'score[i,j]', 'y' is 'score[i,y[i]]', 's' is sum of 'e^score[i]', 'z' is sum of 'e^score[i]' without 'score[i,j]'.
-    # derivative of 'loss value' with respect to 'score[i,j]' is ((e^x)/s - 1) when j is correct class.
-    # derivative of 'loss value' with respect to 'score[i,j]' is ((e^x)/s) when j is not correct class.
+    # 'loss value' of 'score[i,j]' is (-ln(e^y / s)) or (ln(1+ze^(-y))), 'y' is 'score[i,y[i]]', 's' is sum of 'e^score[i]', 'z' is sum of 'e^score[i]' without 'score[i,y[i]]'.
+    # derivative of 'loss value' with respect to 'x=score[i,j]' is ((e^x)/s - 1) when j is correct class.
+    # derivative of 'loss value' with respect to 'x=score[i,j]' is ((e^x)/s) when j is not correct class.
     #
     # compute the loss and the gradient
     num_classes = W.shape[1]

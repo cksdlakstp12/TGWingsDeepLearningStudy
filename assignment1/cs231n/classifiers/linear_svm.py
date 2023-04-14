@@ -38,12 +38,12 @@ def svm_loss_naive(W, X, y, reg):
             margin = scores[j] - correct_class_score + 1  # note delta = 1
             if margin > 0:
                 loss += margin
-                #CASE OF: derivative of 'loss value' with respect to 'score[i,j]' is 'score[i,j]'
+                #CASE OF: derivative of 'loss value' with respect to 'score[i,j]' is '1'
                 #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
                 dW[:,j] += X[i]
                 lossAffectCount += 1
         pass
-        #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '-lossAffectCount * score[i,j]'
+        #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '-lossAffectCount * 1'
         #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
         dW[:,y[i]] += (-lossAffectCount * X[i])
 
@@ -69,7 +69,7 @@ def svm_loss_naive(W, X, y, reg):
     pass
     #NOTE: derivative of 'score[i,j]' with respect to 'W[k,j]' is 'X[i,k]'
     #-> derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
-    # derivative of 'loss value' with respect to 'score[i,j]' is (0 or 'score[i,j]' or '-lossAffectCount * score[i,j]')
+    # derivative of 'loss value' with respect to 'score[i,j]' is (0 or '1' or '-lossAffectCount * 1')
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -95,7 +95,7 @@ def svm_loss_vectorized(W, X, y, reg):
     pass
     #NOTE: derivative of 'score[i,j]' with respect to 'W[k,j]' is 'X[i,k]'
     #-> derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
-    # derivative of 'loss value' with respect to 'score[i,j]' is (0 or 'score[i,j]' or '-lossAffectCount * score[i,j]')
+    # derivative of 'loss value' with respect to 'score[i,j]' is (0 or '1' or '-lossAffectCount * 1')
     dW = np.zeros(W.shape)  # initialize the gradient as zero
 
     # compute the loss and the gradient
@@ -111,13 +111,13 @@ def svm_loss_vectorized(W, X, y, reg):
     #loss value update
     loss += margin.sum()
     bmargin = (margin > 0)
-    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is 'score[i,j]'
+    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '1'
     #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
     #dW[:,j] += (X[i] * bmargin[i,j])
     #dW += (X[i].reshape(-1,1) * bmargin[i].reshape(1,-1))
     dW += np.sum(np.expand_dims(X, axis=2) * np.expand_dims(bmargin, axis=1), axis=0)
     #
-    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '-lossAffectCount * score[i,j]'
+    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '-lossAffectCount * 1'
     #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
     lossAffectCount = np.sum(bmargin, axis=1)
     #dW[:,y[i]] -= (lossAffectCount[i] * X[i])
