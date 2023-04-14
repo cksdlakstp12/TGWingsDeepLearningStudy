@@ -31,19 +31,30 @@ def svm_loss_naive(W, X, y, reg):
     for i in range(num_train):
         scores = X[i].dot(W)
         correct_class_score = scores[y[i]]
+        lossAffectCount = 0
         for j in range(num_classes):
             if j == y[i]:
                 continue
             margin = scores[j] - correct_class_score + 1  # note delta = 1
             if margin > 0:
                 loss += margin
+                #CASE OF: derivative of 'loss value' with respect to 'score[i,j]' is 'score[i,j]'
+                #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+                dW[:,j] += X[i]
+                lossAffectCount += 1
+        pass
+        #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '-lossAffectCount * score[i,j]'
+        #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+        dW[:,y[i]] += (-lossAffectCount * X[i])
 
     # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
     loss /= num_train
+    dW /= num_train
 
     # Add regularization to the loss.
     loss += reg * np.sum(W * W)
+    dW += 2 * reg * W
 
     #############################################################################
     # TODO:                                                                     #
@@ -56,6 +67,9 @@ def svm_loss_naive(W, X, y, reg):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     pass
+    #NOTE: derivative of 'score[i,j]' with respect to 'W[k,j]' is 'X[i,k]'
+    #-> derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+    # derivative of 'loss value' with respect to 'score[i,j]' is (0 or 'score[i,j]' or '-lossAffectCount * score[i,j]')
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -79,6 +93,55 @@ def svm_loss_vectorized(W, X, y, reg):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     pass
+    #NOTE: derivative of 'score[i,j]' with respect to 'W[k,j]' is 'X[i,k]'
+    #-> derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+    # derivative of 'loss value' with respect to 'score[i,j]' is (0 or 'score[i,j]' or '-lossAffectCount * score[i,j]')
+    dW = np.zeros(W.shape)  # initialize the gradient as zero
+
+    # compute the loss and the gradient
+    num_classes = W.shape[1]
+    num_train = X.shape[0]
+    loss = 0.0
+    score = X.dot(W)
+    margin = score + 1
+    correct_class_score = np.zeros((num_train, ))
+    margin[range(num_train),y] = correct_class_score = score[range(num_train),y]
+    margin -= correct_class_score.reshape(-1, 1)
+    margin[margin < 0] = 0
+    #loss value update
+    loss += margin.sum()
+    bmargin = (margin > 0)
+    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is 'score[i,j]'
+    #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+    #dW[:,j] += (X[i] * bmargin[i,j])
+    #dW += (X[i].reshape(-1,1) * bmargin[i].reshape(1,-1))
+    dW += np.sum(np.expand_dims(X, axis=2) * np.expand_dims(bmargin, axis=1), axis=0)
+    #
+    #Handle case: derivative of 'loss value' with respect to 'score[i,j]' is '-lossAffectCount * score[i,j]'
+    #derivative of 'score[i,j]' with respect to 'W[:,j]' is 'X[i]'
+    lossAffectCount = np.sum(bmargin, axis=1)
+    #dW[:,y[i]] -= (lossAffectCount[i] * X[i])
+    #dW[:,y] -= (lossAffectCount * X.T) # This cause read-write problem
+    y_convertIdx = np.zeros((num_classes, num_train, 1))
+    y_convertIdx[y,range(num_train),0] = 1
+    dW -= np.sum(
+        (
+            np.expand_dims(
+                (lossAffectCount.reshape(-1,1) * X),
+                axis=0
+            ) * y_convertIdx
+        ),
+        axis=1
+    ).T
+
+    # Right now the loss is a sum over all training examples, but we want it
+    # to be an average instead so we divide by num_train.
+    loss /= num_train
+    dW /= num_train
+
+    # Add regularization to the loss.
+    loss += reg * np.sum(W * W)
+    dW += 2 * reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
